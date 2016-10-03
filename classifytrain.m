@@ -6,7 +6,7 @@ classerr=zeros(maxepoch,8);
 
 [cn,dn,bn]=size(traindata);
 ldn=1;%size(trainlabel,2);
-bns=12;
+bns=16;
 if isall
     ntraind=zeros(bns*cn,dn,bn/bns);
     ntrainl=zeros(bns*cn,ldn,bn/bns);
@@ -40,8 +40,6 @@ else
     ntraind=ntraind(:,:,1:nbi);
     ntrainl=ntrainl(:,:,1:nbi);
 end
-[s1,s2,s3]=size(ntrainl)
-pause;
 trainlabel = trainlabel(:,faulti,:);
 testlabel = testlabel(:,faulti,:);
 if showfig
