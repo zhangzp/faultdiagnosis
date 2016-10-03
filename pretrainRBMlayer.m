@@ -5,23 +5,24 @@ function [ layer] = pretrainRBMlayer( vdata,layer,li,showfig)
 maxepoch=50;
 [cs,~]=size(vdata);
 
-learnrate_w      = 0.0001;
-learnrate_vb     = 0.0001;
-learnrate_hb     = 0.0001;
+learnrate_w      = 0.00005;
+learnrate_vb     = 0.00005;
+learnrate_hb     = 0.00005;
 weightcost  = 0.0002;   
 momentum  = 0.3;
 
-vdcov = cov(vdata);
+
 for i=1:li-1    
     hn=layer{i,2};
     v_w_h=layer{i,3};
     h_b=layer{i,5};
-    hstd=diag(v_w_h'*vdcov*v_w_h);hstd=(hstd').^0.5;
+%     hstd=diag(v_w_h'*vdcov*v_w_h);hstd=(hstd').^0.5;
     hdata=zeros(cs,hn);
     hdata(:,:) = vdata*v_w_h+ones(cs,1)*h_b;
-    vdata=hdata./(ones(cs,1)*hstd);
-    vdcov = cov(vdata);
+    vdata=hdata;%./(ones(cs,1)*hstd);
+%     vdcov = cov(vdata);
 end
+vdcov = cov(vdata);
 vn = layer{li,1};
 hn = layer{li,2};
 fprintf(1,'Layer %d to %d: %d-%d \n',li,li+1,vn,hn);
@@ -70,19 +71,8 @@ for epoch = 1:maxepoch
         if bs~=trs
             vafree = vafree+freeenergy(v0((trs+1):bs,:),v_w_h,v_b,h_b,vstd,hstd)/(bs-trs)/bn;
         end
-        v0=v0./(ones(bs,1)*vstd);
-        v1=v1./(ones(bs,1)*vstd);        
-        h0=h0./(ones(bs,1)*hstd);
-        h1=h1./(ones(bs,1)*hstd);
-        mdw=v0(1:trs,:)'*h0(1:trs,:)-v1(1:trs,:)'*h1(1:trs,:);
-        dw = momentum*dw + learnrate_w*(mdw/trs - weightcost*v_w_h);
-        dvb = momentum*dvb + learnrate_vb*(mean(v0(1:trs,:)-v1(1:trs,:),1) - weightcost*v_b);
-        dhb = momentum*dhb + learnrate_hb*(mean(h0(1:trs,:)-h1(1:trs,:),1) - weightcost*h_b);
-        v_w_h = v_w_h + dw;
-        v_b = v_b + dvb;
-        h_b = h_b + dhb;
         if batch==bn% && epoch==maxepoch
-            fprintf(1,'Mean std v0: %6.6f h0: %6.6f v1: %6.6f h1: %6.6f  \n',mean(std(v0)),mean(std(h0)),mean(std(v1)),mean(std(h1)));
+            fprintf(1,'Mean std vdata:%.3f hdata:%.3f v0:%.3f h0:%.3f v1:%.3f h1:%.3f  \n',mean(vstd),mean(hstd),mean(std(v0)),mean(std(h0)),mean(std(v1)),mean(std(h1)));
             if showfig
                 subplot(2,3,1),plot(v0(1:trs,:)'),hold on;plot(v0((trs+1):bs,:)','.'),hold off;
                 subplot(2,3,2),plot(h0(1:trs,:)'),hold on;plot(h0((trs+1):bs,:)','.'),hold off;
@@ -93,6 +83,17 @@ for epoch = 1:maxepoch
                 getframe(fig);
             end
         end
+        v0=v0./(ones(bs,1)*vstd);
+        v1=v1./(ones(bs,1)*vstd);        
+        h0=h0./(ones(bs,1)*hstd);
+        h1=h1./(ones(bs,1)*hstd);
+        mdw=v0(1:trs,:)'*h0(1:trs,:)-v1(1:trs,:)'*h1(1:trs,:);
+        dw = momentum*dw + learnrate_w*(mdw/trs - weightcost*v_w_h);
+        dvb = momentum*dvb + learnrate_vb*(mean(v0(1:trs,:)-v1(1:trs,:),1));
+        dhb = momentum*dhb + learnrate_hb*(mean(h0(1:trs,:)-h1(1:trs,:),1));
+        v_w_h = v_w_h + dw;
+        v_b = v_b + dvb;
+        h_b = h_b + dhb;        
     end
     error_freee(1,epoch) = traerr;
     error_freee(2,epoch) = valerr;
