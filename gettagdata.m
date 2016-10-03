@@ -1,9 +1,9 @@
 function [ traind,trainl,testd,testl ] = gettagdata(faulti,tagn,timen)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
-ld=load('D:\ZhangProject\data50select.mat');
-trainl=ld.trainlable;
-testl=ld.testlable;
+ld=load('D:\ZhangProject\data5021select.mat');
+trainl=ld.trainlabel;
+testl=ld.testlabel;
 selectv=ld.vselect(faulti,:);
 [bs,~,bn]=size(ld.traindata);
 traind = zeros(bs,tagn*timen,bn);

@@ -5,11 +5,11 @@ function [ layer] = pretrainRBMlayer( vdata,layer,li,showfig)
 maxepoch=50;
 [cs,~]=size(vdata);
 
-learnrate_w      = 0.00005;
-learnrate_vb     = 0.00005;
-learnrate_hb     = 0.00005;
+learnrate_w      = 0.000005;
+learnrate_vb     = 0.000005;
+learnrate_hb     = 0.000005;
 weightcost  = 0.0002;   
-momentum  = 0.3;
+momentum  = 0.8;
 
 
 for i=1:li-1    

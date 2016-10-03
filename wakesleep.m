@@ -11,6 +11,12 @@ if trs==s1
 end
 traindata=vdata(1:trs,:);
 testdata=vdata((trs+1):s1,:);
+batchsize=1200;
+batchdata=zeros(batchsize,s2,trs/batchsize);
+for batch=1:(trs/batchsize)
+    batchdata(:,:,batch)=traindata(((batch-1)*batchsize+1):(batch*batchsize),:);
+end
+
 if showfig
     close all;
     fig = figure('Position',[700,400,1000,600]);
@@ -43,20 +49,21 @@ for epoch = 1:maxepoch
     if epoch~=maxepoch
         wakew=weight(1:size(weight)/2,1);
         sleepw=weight((size(weight)/2+1):size(weight),1);
+        for batch=1:size(batchdata,3)
             max_iter=1;
-            vout=traindata;
+            vout=batchdata(:,:,batch);
             for wi=1:size(wakew)
                 vout_1=[vout,ones(size(vout,1),1)];
                 vout = vout_1*wakew{wi,1};
             end
-            [ sleepw,~] = updateweight( sleepw,max_iter,vout,traindata,1);
+            [ sleepw,~] = updateweight( sleepw,max_iter,vout,batchdata(:,:,batch),1);
             redata=vout;
             for wi=1:size(sleepw)
                 vout_1=[redata,ones(size(redata,1),1)];
                 redata = vout_1*sleepw{wi,1};
             end
             [ wakew,~] = updateweight( wakew,max_iter,redata,vout,1);
-        
+        end
         weight(1:size(weight)/2,1)=wakew;
         weight((size(weight)/2+1):size(weight),1)=sleepw;
     end
